@@ -7,8 +7,8 @@ namespace EXider {
 	Program::Program( const std::string& m_fileName, const std::string& m_path ):Program(m_fileName,m_path,"") {
 
 	}
-	Program::Program( const std::string& fullPathWithArguments ) {
-	
+	Program::Program( const std::string& fullPathWithArguments ) { // TODO
+	 
 	}
 	const std::string Program::getFileName() const {
 		return m_fileName;

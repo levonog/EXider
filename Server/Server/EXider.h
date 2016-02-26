@@ -21,11 +21,13 @@ namespace EXider {
 
 
 	// Classes
+	class FtpClient;
 	class Program;
 	class ProgramExecutor;
 	class Server;
 
 }
+#include "FtpClient.h"
 #include "Program.h"
 #include "ProgramExecutor.h"
 #include "Server.h"
