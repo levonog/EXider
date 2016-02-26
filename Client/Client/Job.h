@@ -3,6 +3,7 @@
 namespace EXider {
 	class Job {
 		friend class RemotePC;
+		boost::recursive_mutex m_mutex;
 		std::vector<RemotePC*> m_workingPCs;
 		std::vector<bool> m_downloadsFiles;
 		std::vector<std::string> m_result;
@@ -11,5 +12,7 @@ namespace EXider {
 		Job( const std::vector<RemotePC*> workingPCs, const std::string downloadURL, const std::string executeCommand, bool autoFree = 0 );
 		Job( const std::vector<RemotePC*> workingPCs, const std::string executeCommand, bool autoFree = 0 );
 
+		const std::string getResult() const;
+		const std::string getInfromation() const;
 	};
 }
