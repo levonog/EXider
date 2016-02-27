@@ -2,14 +2,13 @@
 #include "EXider.h"
 namespace EXider {
 	class Task {
-		friend class RemotePC;
 		boost::recursive_mutex m_mutex;
-		std::vector<boost::shared_ptr<RemotePC> > m_workingPCs;
-		const std::string m_downloadURL, m_executeCommand;
+		std::vector<boost::shared_ptr<RemotePC> > m_workingPCs;		// PC's working on the task
+		const std::string m_downloadURL, m_executeCommand;			// Download URL (ftp) and Executeing Command for RemotePC
 		std::vector<bool> m_downloadsFiles;
-		std::vector<std::string> m_result;
-		void handler( size_t pcID, std::string result );
-		bool m_autoFree;
+		std::vector<std::string> m_result;							// Results received from RemotePC's
+		void handler( size_t pcID, std::string result );			// call-back function for RemotePC
+		bool m_autoFree;											// Automaticly delete PC from the task, when result is received
 	public:
 		Task( const std::vector<boost::shared_ptr<RemotePC> > workingPCs, const std::string downloadURL, const std::string executeCommand, bool autoFree = 0 );
 		Task( const std::vector<boost::shared_ptr<RemotePC> > workingPCs, const std::string executeCommand, bool autoFree = 0 );
