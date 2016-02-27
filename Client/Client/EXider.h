@@ -4,26 +4,27 @@
 #include <string>
 #include <vector>
 #include <list>
-
+#include <exception>
 #include <boost\asio.hpp>
 #include <boost\thread.hpp>
 
 namespace EXider {
-
-	enum rpcStatus { // RemotePC Status
+	const size_t EXIDER_PORT = 8008;
+	enum rpcStatus {	// RemotePC Statuses
+		NotConencted,
 		ConnectionError,
-		ErrorRequired,
+		Connecting,
 		Available,
-		Working,
+		WaitingForRequest,
 		SendingRequest
 	};
 
-	class Logger;
-	class FtpClient;
-	class Information;
-	class RemotePC;
-	class Job;
-	class Client;
+	class Logger; 
+	class FtpClient;	// FTP Client to upload and download files
+	class Information;	// Displaying different infromation
+	class RemotePC;		// Remote PC controller (Server controller) 
+	class Task;			// Task controller
+	class Client;		// Main class producing all activity
 	
 
 }
@@ -32,5 +33,5 @@ namespace EXider {
 #include "FtpClient.h"
 #include "Information.h"
 #include "RemotePC.h"
-#include "Job.h"
+#include "Task.h"
 #include "Client.h"

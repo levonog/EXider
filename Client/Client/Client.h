@@ -7,7 +7,7 @@ namespace EXider {
 //		Information m_info;
 
 		std::list<RemotePC> m_pc;
-		std::list<Job> m_jobs;
+		std::list<Task> m_jobs;
 		boost::asio::io_service& m_io;
 		FtpClient m_ftp;
 		void commandHandler( const std::string command );
