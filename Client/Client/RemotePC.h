@@ -15,17 +15,18 @@ namespace EXider {
 	
 		void sendHandler( const boost::system::error_code& error );
 		void readHandler( const boost::system::error_code& error, size_t bytes );
-		void connectedHandler( const boost::system::error_code& error, size_t bytes );
+		void connectedHandler( const boost::system::error_code& error );
 	public:
-		RemotePC( boost::asio::io_service& io, const std::string IP );
+		RemotePC( boost::asio::io_service& io, const std::string& IP );
+		RemotePC( boost::asio::io_service& io, const boost::asio::ip::address& IP );
 		void reconnect();
 		void disconnect();
 		inline const rpcStatus status() const;
 		void sendRequest( const std::string& request );
 		void readRequest();
-		inline void setID( size_t ID );
-		inline void setCallBackFunction( const boost::function<void( int ID, std::string result )>& cb );
+		void setID( size_t ID );
+		void setCallBackFunction( const boost::function<void( int ID, std::string result )>& cb );
 		inline size_t getID() const;
-
+		inline const boost::asio::ip::address getIP() const;
 	};
 };

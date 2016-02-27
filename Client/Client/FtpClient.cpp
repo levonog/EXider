@@ -7,7 +7,7 @@ namespace EXider { // TODO
 
 		return false;
 	}
-	void FtpClient::reConnect() {
+	void FtpClient::reconnect() {
 
 	}
 	void FtpClient::disconnect() {

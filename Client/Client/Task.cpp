@@ -1,19 +1,19 @@
 #include "EXider.h"
 namespace EXider {
-	Task::Task( const std::vector<RemotePC*> workingPCs, const std::string downloadURL, const std::string executeCommand, bool autoFree = 0 ) :
+	Task::Task( const std::vector<boost::shared_ptr<RemotePC> > workingPCs, const std::string downloadURL, const std::string executeCommand, bool autoFree) :
 		m_workingPCs( workingPCs ), m_downloadsFiles( workingPCs.size(), false ), m_result( workingPCs.size(), "-" ),
 		m_downloadURL( downloadURL ), m_executeCommand( executeCommand ), m_autoFree( autoFree ) {
 		for ( size_t i = 0; i < m_workingPCs.size(); ++i ) {
 			m_workingPCs[ i ]->setID( i );
-			m_workingPCs[ i ]->setCallBackFunction( handler );
+			m_workingPCs[ i ]->setCallBackFunction( boost::bind( &Task::handler, this, _1, _2 ) );
 		}
 	}
-	Task::Task( const std::vector<RemotePC*> workingPCs, const std::string executeCommand, bool autoFree = 0 ) :
+	Task::Task( const std::vector<boost::shared_ptr<RemotePC> > workingPCs, const std::string executeCommand, bool autoFree ) :
 		m_workingPCs( workingPCs ), m_downloadsFiles( workingPCs.size(), true ), m_result( workingPCs.size(), "-" ),
 		m_executeCommand( executeCommand ), m_autoFree( autoFree ) {
 		for ( size_t i = 0; i < m_workingPCs.size(); ++i ) {
 			m_workingPCs[ i ]->setID( i );
-			m_workingPCs[ i ]->setCallBackFunction( handler );
+			m_workingPCs[ i ]->setCallBackFunction( boost::bind( &Task::handler, this, _1, _2 ) );
 		}
 	}
 	void Task::run() {
@@ -37,10 +37,10 @@ namespace EXider {
 		return sResult;
 	}
 	const std::string Task::getInfromation() const {
-
+		return "";
 	}
 
-	void Task::handler( size_t pcID, const std::string& result) {
+	void Task::handler( size_t pcID, const std::string result) {
 		std::istringstream iss( result );
 		std::string command;
 		iss >> command;
