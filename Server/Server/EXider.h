@@ -15,18 +15,23 @@
 #include <boost\timer.hpp>
 
 namespace EXider {
-	// Variables
+	// Variables, Enums and structs
 	const size_t PORT = 8008;
-
+	struct EXiderArgument {
+		std::string argument;
+		std::vector<std::string> parameters;
+	};
 
 
 	// Classes
+	class CommandParser;
 	class FtpClient;
 	class Program;
 	class ProgramExecutor;
 	class Server;
 
 }
+#include "CommandParser.h"
 #include "FtpClient.h"
 #include "Program.h"
 #include "ProgramExecutor.h"

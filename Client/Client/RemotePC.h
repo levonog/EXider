@@ -11,7 +11,7 @@ namespace EXider {
 		
 		rpcStatus m_status;
 
-		size_t m_id;
+		int m_id;
 		// Async Wrtie, Read, Connecting Handlers
 		void sendHandler( const boost::system::error_code& error );
 		void readHandler( const boost::system::error_code& error, size_t bytes );
@@ -20,6 +20,7 @@ namespace EXider {
 	public:
 		RemotePC( boost::asio::io_service& io, const std::string& IP );
 		RemotePC( boost::asio::io_service& io, const boost::asio::ip::address& IP );
+		void connect();										// Connect to the socket
 		void reconnect();									// Reconnecting to the socket
 		void disconnect();									// Disconnecting the socke
 		inline const rpcStatus status() const;				// PC's current status
@@ -31,7 +32,9 @@ namespace EXider {
 		void setID( size_t ID );  
 		void setCallBackFunction( const boost::function<void( int ID, std::string result )>& cb );
 	
-		inline size_t getID() const;							// PC's ID in current Task
+		const int getID() const;								// PC's ID in current Task
 		inline const boost::asio::ip::address getIP() const;	// IP's IP address
+		bool operator==( const RemotePC& rhrp ) const;
+		bool operator<( const RemotePC& rhrp ) const;
 	};
 };

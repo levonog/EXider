@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <set>
 #include <list>
 #include <exception>
 #include <boost\asio.hpp>
@@ -19,20 +20,31 @@ namespace EXider {
 		WaitingForRequest,
 		SendingRequest
 	};
+	struct EXiderArgument {
+		std::string argument;
+		std::vector<std::string> parameters;
+	};
 
+
+
+	class CommandParser;
 	class Logger; 
 	class FtpClient;	// FTP Client to upload and download files
 	class Information;	// Displaying different infromation
 	class RemotePC;		// Remote PC controller (Server controller) 
 	class Task;			// Task controller
 	class Client;		// Main class producing all activity
-	
+
+
+	struct RPComparator;
+	typedef std::set<boost::shared_ptr<RemotePC>, RPComparator> PCList;
 
 }
-
+#include "CommandParser.h"
 #include "Logger.h"
 #include "FtpClient.h"
 #include "Information.h"
 #include "RemotePC.h"
+#include "RPComparator.h"
 #include "Task.h"
 #include "Client.h"

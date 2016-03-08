@@ -1,33 +1,33 @@
 #include "EXider.h"
 namespace EXider {
-	Task::Task( const std::vector<boost::shared_ptr<RemotePC> > workingPCs, const std::string downloadURL, const std::string executeCommand, bool autoFree) :
-		m_workingPCs( workingPCs ), m_downloadsFiles( workingPCs.size(), false ), m_result( workingPCs.size(), "-" ),
+	Task::Task( const PCList& workingPCs, const std::string downloadURL, const std::string executeCommand, bool autoFree) :
+		m_workingPCs( workingPCs ), m_downloadsFiles( true ), m_result( workingPCs.size(), "-" ),
 		m_downloadURL( downloadURL ), m_executeCommand( executeCommand ), m_autoFree( autoFree ) {
-		for ( size_t i = 0; i < m_workingPCs.size(); ++i ) {
-			m_workingPCs[ i ]->setID( i );
-			m_workingPCs[ i ]->setCallBackFunction( boost::bind( &Task::handler, this, _1, _2 ) );
+		size_t pcID = 0;
+		for ( auto pc : m_workingPCs ) {
+			pc->setID( pcID++ );
+			pc->setCallBackFunction( boost::bind( &Task::handler, this, _1, _2 ) );
 		}
+		
 	}
-	Task::Task( const std::vector<boost::shared_ptr<RemotePC> > workingPCs, const std::string executeCommand, bool autoFree ) :
-		m_workingPCs( workingPCs ), m_downloadsFiles( workingPCs.size(), true ), m_result( workingPCs.size(), "-" ),
+	Task::Task( const PCList& workingPCs, const std::string executeCommand, bool autoFree ) :
+		m_workingPCs( workingPCs ), m_downloadsFiles( false ), m_result( workingPCs.size(), "-" ),
 		m_executeCommand( executeCommand ), m_autoFree( autoFree ) {
-		for ( size_t i = 0; i < m_workingPCs.size(); ++i ) {
-			m_workingPCs[ i ]->setID( i );
-			m_workingPCs[ i ]->setCallBackFunction( boost::bind( &Task::handler, this, _1, _2 ) );
+		size_t pcID = 0;
+		for ( auto pc : m_workingPCs ) {
+			pc->setID( pcID++ );
+			pc->setCallBackFunction( boost::bind( &Task::handler, this, _1, _2 ) );
 		}
 	}
 	void Task::run() {
 		char request[ 256 ];
 
-		for ( int i = 0; i < m_workingPCs.size(); ++i ) {
-			if ( !m_downloadsFiles[ i ] )
-				sprintf( request, "Donwload %s", m_downloadURL.c_str() );
-
+		for (auto pc : m_workingPCs) {
+			if ( m_downloadsFiles )
+				sprintf( request, "Download %s", m_downloadURL.c_str() );
 			else
-				sprintf( request, "Run %s -pcid %d", m_executeCommand, i );
-
-			m_workingPCs[ i ]->sendRequest( request );
-
+				sprintf( request, "Run %s -pcid %d", m_executeCommand, pc->getID());
+			pc->sendRequest( request );
 		}
 	}
 	const std::string Task::getResult( const std::string& delimeter ) const {
