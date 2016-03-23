@@ -153,6 +153,12 @@ namespace EXider {
 						continue;
 					startTask( programPath, programArguments, computersWillBeUsed, withoutSending );
 				}
+				else if ( arg[ 0 ].argument == "stop" ) {
+
+				}
+				else {
+					std::cout << "Wrong argument." << std::endl;
+				}
 			}
 			else if ( parser.command() == "help" ) {
 
