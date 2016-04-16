@@ -7,7 +7,7 @@ namespace EXider {
 		//		Information m_info;
 		//		FtpClient m_ftp;
 
-		PCList m_freePC, m_busyPC;
+		PCList m_freePC, m_busyPC, m_notConnectedPC;
 		std::vector<boost::shared_ptr<Task> > m_tasks;
 		boost::asio::io_service& m_io;
 		void commandHandler( const std::string command );

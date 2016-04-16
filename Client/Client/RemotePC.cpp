@@ -3,23 +3,33 @@ namespace EXider {
 	RemotePC::RemotePC( boost::asio::io_service& io, const std::string& IP ) :
 		m_socket( io ), m_status( NotConencted ), m_id (0 ),
 		m_endpoint( boost::asio::ip::address::from_string( IP ), EXIDER_PORT ) {
-		m_socket.async_connect( m_endpoint, boost::bind( &RemotePC::connectedHandler, this, _1 ) );
+		//m_socket.async_connect( m_endpoint, boost::bind( &RemotePC::connectedHandler, this, _1 ) );
+
 	}
 
 	RemotePC::RemotePC( boost::asio::io_service & io, const boost::asio::ip::address & IP ) :
 		m_socket( io ), m_status( NotConencted ), m_id (0),
 		m_endpoint( IP, EXIDER_PORT ) {
+	
 	}
 
-	void RemotePC::connect()
+	bool RemotePC::connect()
 	{
-		m_socket.async_connect( m_endpoint, boost::bind( &RemotePC::connectedHandler, this, _1 ) );
-		m_status = Connecting;
+		boost::system::error_code er;
+		m_socket.connect( m_endpoint, er);
+		if ( er ) {
+			m_status = NotConencted;
+			return false;
+		}
+		else {
+			m_status = Available;
+			return true;
+		}
 	}
 
-	void RemotePC::reconnect() {
+	bool RemotePC::reconnect() {
 		disconnect();
-		connect();
+		return connect();
 	}
 
 	void RemotePC::disconnect() {
@@ -38,7 +48,9 @@ namespace EXider {
 		else if ( m_status != Available )
 			throw std::exception( "Connection ism't available" );
 
-		m_socket.async_write_some( boost::asio::buffer( request + "\n" ), boost::bind( &RemotePC::sendHandler, this, _1 ) );
+		char reqToSend[ 256 ];
+		sprintf( reqToSend, "%s\n", request.c_str() );
+		m_socket.async_write_some( boost::asio::buffer( reqToSend ), boost::bind( &RemotePC::sendHandler, this, _1 ) );
 	}
 	void RemotePC::readRequest() {
 		if ( !m_socket.is_open() )
@@ -51,7 +63,7 @@ namespace EXider {
 	void RemotePC::setID( size_t ID ) {
 		m_id = ID;
 	}
-	void RemotePC::setCallBackFunction( const boost::function<void( int ID, std::string result )>& cb ) {
+	void RemotePC::setCallBackFunction( const boost::function<void( boost::shared_ptr<RemotePC> fromPC, std::string result )>& cb ) {
 		m_callback = cb;
 	}
 
@@ -74,27 +86,29 @@ namespace EXider {
 
 	void RemotePC::readHandler( const boost::system::error_code& error, size_t bytes ) {
 		if ( error )
-			m_callback( m_id, "Reading ERROR" );
+			m_callback( getSelfPtr(), "Reading ERROR" );
 		std::istream is( &m_buffer );
 		std::string result;
 		std::getline( is, result );
-		m_callback( m_id, result );
+		m_callback( getSelfPtr(), result );
 	}
 	void RemotePC::sendHandler( const boost::system::error_code& error ) {
 		if ( error )
-			m_callback( m_id, "Wriing ERROR" );
+			m_callback( getSelfPtr(), "Wriing ERROR" );
 		else
-			m_callback( m_id, "Writing OK" );
+			m_callback( getSelfPtr(), "Writing OK" );
 	}
 	void RemotePC::connectedHandler( const boost::system::error_code& error ) {
 		if ( error ) {
-			m_callback( m_id, "Connecting ERROR" );
+			m_callback( getSelfPtr(), "Connecting ERROR" );
 			m_status = ConnectionError;
 		}
 		else {
-			m_callback( m_id, "Writing OK" );
+			m_callback( getSelfPtr(), "Connection OK" );
 			m_status = Available;
 		}
 	}
-
+	boost::shared_ptr<RemotePC> RemotePC::getSelfPtr() {
+		return shared_from_this();
+	}
 }

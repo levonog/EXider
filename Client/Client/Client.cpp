@@ -175,17 +175,22 @@ namespace EXider {
 	}
 	void Client::addRemotePCs( const std::vector<boost::asio::ip::address>& IPs ) {
 		for ( auto ip : IPs ) {
-			if ( m_freePC.insert( boost::shared_ptr<RemotePC>( new RemotePC( m_io, ip ) ) ).second )
-				std::cout << "Remote PC with IP " << ip.to_string() << " was added.\n";
-			else
-				std::cout << "Remote PC with IP " << ip.to_string() << " was already added.\n";
+			boost::shared_ptr<RemotePC> pc( new RemotePC( m_io, ip ) );
+			if ( pc->connect() ) {
+				m_freePC.insert( pc );
+				std::cout << "Remote PC with IP " << ip.to_string() << " was connected.\n";
+			}
+			else {
+				m_notConnectedPC.insert( pc );
+				std::cout << "Remote PC with IP " << ip.to_string() << " wasn't connected.\n";
+			}
 		}
 	}
 	void Client::deleteRemotePCs( const std::vector<boost::asio::ip::address>& IPs ) {
 		for ( size_t i = 0; i < IPs.size(); ++i ) {
 			m_freePC.erase( boost::shared_ptr<RemotePC>( new RemotePC( m_io, IPs[ i ] ) ) );
 			m_busyPC.erase( boost::shared_ptr<RemotePC>( new RemotePC( m_io, IPs[ i ] ) ) );
-
+			m_notConnectedPC.erase( boost::shared_ptr<RemotePC>( new RemotePC( m_io, IPs[ i ] ) ) );
 			std::cout << "Remote PC with IP " << IPs[ i ].to_string() << " was deleted.\n";
 		}
 	}
@@ -214,8 +219,9 @@ namespace EXider {
 			m_busyPC.insert( *m_freePC.begin() );
 			m_freePC.erase( m_freePC.begin() );
 		}
-		if ( withoutSendingProgram )
-			m_tasks.push_back( boost::shared_ptr<Task>( new Task( listForTask, filePath + " " + arguments ) ) );
+		if ( withoutSendingProgram ) {
+			m_tasks.push_back( boost::shared_ptr<Task>( new Task(m_io, listForTask, filePath + " " + arguments ) ) );
+		}
 		std::cout << "Task started.\n";
 		// TODO
 	}

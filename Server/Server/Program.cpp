@@ -32,6 +32,7 @@ namespace EXider {
 
 	}
 	void Program::deleteWhitespaces( std::string & str ) {
-		str = str.substr( str.find_first_not_of( ' ' ));
+		if ( !str.empty() )
+			str = str.substr( str.find_first_not_of( ' ' ) );
 	}
 }

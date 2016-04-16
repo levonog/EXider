@@ -1,18 +1,17 @@
 #include "EXider.h"
 namespace EXider {
-	Task::Task( const PCList& workingPCs, const std::string downloadURL, const std::string executeCommand, bool autoFree) :
+	Task::Task( boost::asio::io_service& io, const PCList& workingPCs, const std::string downloadURL, const std::string executeCommand, bool autoFree) :
 		m_workingPCs( workingPCs ), m_downloadsFiles( true ), m_result( workingPCs.size(), "-" ),
-		m_downloadURL( downloadURL ), m_executeCommand( executeCommand ), m_autoFree( autoFree ) {
+		m_downloadURL( downloadURL ), m_executeCommand( executeCommand ), m_autoFree( autoFree ),m_io(io), m_thread( boost::bind( &Task::run, this ) ) {
 		size_t pcID = 0;
 		for ( auto pc : m_workingPCs ) {
 			pc->setID( pcID++ );
 			pc->setCallBackFunction( boost::bind( &Task::handler, this, _1, _2 ) );
 		}
-		
 	}
-	Task::Task( const PCList& workingPCs, const std::string executeCommand, bool autoFree ) :
+	Task::Task( boost::asio::io_service& io, const PCList& workingPCs, const std::string executeCommand, bool autoFree ) :
 		m_workingPCs( workingPCs ), m_downloadsFiles( false ), m_result( workingPCs.size(), "-" ),
-		m_executeCommand( executeCommand ), m_autoFree( autoFree ) {
+		m_executeCommand( executeCommand ), m_autoFree( autoFree ), m_io(io), m_thread(boost::bind(&Task::run, this) ) {
 		size_t pcID = 0;
 		for ( auto pc : m_workingPCs ) {
 			pc->setID( pcID++ );
@@ -26,9 +25,10 @@ namespace EXider {
 			if ( m_downloadsFiles )
 				sprintf( request, "Download %s", m_downloadURL.c_str() );
 			else
-				sprintf( request, "Run %s -pcid %d", m_executeCommand, pc->getID());
+				sprintf( request, "Run %s -pcid %d", m_executeCommand.c_str(), pc->getID());
 			pc->sendRequest( request );
 		}
+		m_io.run();
 	}
 	const std::string Task::getResult( const std::string& delimeter ) const {
 		std::string sResult = "";
@@ -40,7 +40,7 @@ namespace EXider {
 		return "";
 	}
 
-	void Task::handler( size_t pcID, const std::string result) {
+	void Task::handler(boost::shared_ptr<RemotePC> fromPC, const std::string result) {
 		std::istringstream iss( result );
 		std::string command;
 		iss >> command;
@@ -51,9 +51,9 @@ namespace EXider {
 		}
 		else if ( command == "Writing" ) {
 			iss >> command;
-			if ( command == "OK" )
-				return;
-
+			if ( command == "OK" ) {
+				fromPC->readRequest();
+			}
 		}
 		else if ( command == "Connecting" ) {
 			iss >> command;
@@ -64,12 +64,14 @@ namespace EXider {
 			iss  >> command;
 			if ( command == "OK" ) {
 				char request[ 256 ];
-				sprintf( request, "Run %s -pcid %d", m_executeCommand, pcID );
+				sprintf( request, "Run %s -pcid %d", m_executeCommand, fromPC->getID() );
+				fromPC->sendRequest( request );
 			}
 		}
-		else if (command == "ExecuteResult" ) {
+		else if (command == "Result" ) {
 			std::getline( iss, command );
-			m_result[ pcID ] = command;
+			m_result[ fromPC->getID() ] = command;
+			std::cerr << command << std::endl;
 		}
 	}
 }

@@ -2,12 +2,11 @@
 #include "EXider.h"
 namespace EXider {
 
-	class RemotePC {
+	class RemotePC : public boost::enable_shared_from_this<RemotePC>{
 		boost::asio::ip::tcp::socket m_socket;
 		boost::asio::ip::tcp::endpoint m_endpoint;
 		boost::asio::streambuf m_buffer;
-		boost::function<void( int, std::string )> m_callback;
-
+		boost::function<void(boost::shared_ptr<RemotePC>, std::string )> m_callback;
 		
 		rpcStatus m_status;
 
@@ -20,8 +19,8 @@ namespace EXider {
 	public:
 		RemotePC( boost::asio::io_service& io, const std::string& IP );
 		RemotePC( boost::asio::io_service& io, const boost::asio::ip::address& IP );
-		void connect();										// Connect to the socket
-		void reconnect();									// Reconnecting to the socket
+		bool connect();										// Connect to the socket
+		bool reconnect();									// Reconnecting to the socket
 		void disconnect();									// Disconnecting the socke
 		inline const rpcStatus status() const;				// PC's current status
 		
@@ -30,8 +29,9 @@ namespace EXider {
 
 		// Setup PC's ID in current Task, and call-back function to communicate with the Task
 		void setID( size_t ID );  
-		void setCallBackFunction( const boost::function<void( int ID, std::string result )>& cb );
+		void setCallBackFunction( const boost::function<void( boost::shared_ptr<RemotePC> fromPC, std::string result )>& cb );
 	
+		boost::shared_ptr<RemotePC> getSelfPtr();		// Self Pointer
 		const int getID() const;								// PC's ID in current Task
 		inline const boost::asio::ip::address getIP() const;	// IP's IP address
 		bool operator==( const RemotePC& rhrp ) const;

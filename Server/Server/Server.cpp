@@ -56,18 +56,38 @@ namespace EXider {
 
 	void Server::send_request( int id, std::string message ) {
 		char messageToSend[ 256 ];
-		sprintf( messageToSend, "Result: %s\n", message.c_str() );
+		sprintf( messageToSend, "Result %s\n", message.c_str() );
 		boost::asio::write( *m_socket, boost::asio::buffer( messageToSend ) );
 	}
 
 	int Server::taskManager( const std::string& str ) { // TODO
-		std::string task = str.substr( str.find_first_not_of( ' ' ));
-		Program prog( task, "" );
-		if ( task == "stop" ) {
-			m_executor.terminateRunningProcess();
-		}
-		else
+		std::istringstream iss( str );
+		std::string task;
+		iss >> task;
+		if ( task == "Run" ) {
+			std::string path;
+			std::string arguments;
+			iss >> path;
+			std::getline( iss, arguments );
+			Program prog( path,"", arguments );
 			m_executor.addProgram( 0, prog );
+		}
+		else if ( task == "Stop" ) {
+			if ( iss >> task && task == "all" ) {
+				m_executor.stop();
+			}
+			else
+				m_executor.terminateRunningProcess();
+		}
+		else if ( task == "Download" ) {
+			// TODO
+		}
+		else if ( task == "Exit" ) {
+			return 1;
+		}
+		else {
+			std::cerr << "Unkown command!" << std::endl;
+		}
 		return 0;
 	}
 }
