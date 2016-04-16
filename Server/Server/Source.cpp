@@ -4,8 +4,11 @@
 int main( int argc, char* argv[] )
 {
 	boost::asio::io_service io;
+
 	EXider::Server serv( io );
-	EXider::CommandParser arg;
+	serv.run();
+
+	/*EXider::CommandParser arg;
 
 	std::string line;
 	while ( true ) {
@@ -23,6 +26,6 @@ int main( int argc, char* argv[] )
 				}
 			}
 		}
-	}
+	}*/
 	return 0;
 }

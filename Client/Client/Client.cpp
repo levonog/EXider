@@ -140,7 +140,7 @@ namespace EXider {
 						else if ( ( arg[ i ].argument == "a" || arg[ i ].argument == "arg" ) && arg[ i ].parameters.size() == 1 ) {
 							programArguments = arg[ i ].parameters[ 0 ];
 						}
-						else if ( arg[ i ].argument == "without-sending" || arg[ i ].argument == "wd" ) {
+						else if ( arg[ i ].argument == "without-sending" || arg[ i ].argument == "ws" ) {
 							withoutSending = true;
 						}
 						else {
@@ -205,7 +205,7 @@ namespace EXider {
 
 	void Client::startTask( const std::string & filePath, const std::string & arguments, int computersToUse, bool withoutSendingProgram ) {
 		if ( computersToUse > m_freePC.size() ) {
-			std::cout << "Not enough computers to porcess current task. " << m_freePC.size() << " available." << std::endl;
+			std::cout << "Not enough computers to process current task. " << m_freePC.size() << " available." << std::endl;
 			return;
 		}
 		PCList listForTask;

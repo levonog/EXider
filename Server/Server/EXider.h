@@ -10,10 +10,11 @@
 #include <queue>
 #include <memory>
 //Boost
+#include <boost\filesystem.hpp>
 #include <boost\asio.hpp>
 #include <boost\thread.hpp>
 #include <boost\timer.hpp>
-
+#include <boost\process.hpp>
 namespace EXider {
 	// Variables, Enums and structs
 	const size_t PORT = 8008;

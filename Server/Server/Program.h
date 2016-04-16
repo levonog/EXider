@@ -5,6 +5,7 @@ namespace EXider {
 		std::string m_fileName;
 		std::string m_path;
 		std::string m_arguments;
+		void deleteWhitespaces(std::string & str);
 	public:
 		Program( const std::string& m_fileName, const std::string& m_path, const std::string& m_arguments );
 		Program( const std::string& m_fileName, const std::string& m_path );
