@@ -29,7 +29,6 @@ namespace EXider {
 	class CommandParser;
 	class Logger; 
 	class FtpClient;	// FTP Client to upload and download files
-	class Information;	// Displaying different infromation
 	class RemotePC;		// Remote PC controller (Server controller) 
 	class Task;			// Task controller
 	class Client;		// Main class producing all activity
