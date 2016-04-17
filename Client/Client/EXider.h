@@ -13,13 +13,12 @@
 namespace EXider {
 	const size_t EXIDER_PORT = 8008;
 	enum rpcStatus {	// RemotePC Statuses
-		NotConencted,
-		ConnectionError,
-		Connecting,
-		Available,
-		WaitingForRequest,
-		SendingRequest
+		NotConencted = 1,
+		Available = 2,
+		Busy = 4,
+		ConnectionError = 8
 	};
+
 	struct EXiderArgument {
 		std::string argument;
 		std::vector<std::string> parameters;

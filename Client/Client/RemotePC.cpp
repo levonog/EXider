@@ -3,7 +3,6 @@ namespace EXider {
 	RemotePC::RemotePC( boost::asio::io_service& io, const std::string& IP ) :
 		m_socket( io ), m_status( NotConencted ), m_id (0 ),
 		m_endpoint( boost::asio::ip::address::from_string( IP ), EXIDER_PORT ) {
-		//m_socket.async_connect( m_endpoint, boost::bind( &RemotePC::connectedHandler, this, _1 ) );
 
 	}
 
