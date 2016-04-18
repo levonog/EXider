@@ -89,7 +89,7 @@ namespace EXider {
 				"   -ip IP_List           - Delete RemotePCs by their IP Address.\n"
 				"   -f FileName_List      - Delete RemotePCs by IPs from files.\n"
 				"\n"
-				"-save FileName           - Saves RemotePCs to file\.n"
+				"-save FileName           - Saves RemotePCs to file.\n"
 				"\n"
 				"-list                    - List of RemotePCs. If used without arguments will print only Available RemotePCs.\n"
 				"   -available            - Prints available RemotePC's IP Addresses\n"
