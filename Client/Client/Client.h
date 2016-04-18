@@ -5,7 +5,8 @@ namespace EXider {
 	class Client {
 		//		Logger m_logger;
 		//		FtpClient m_ftp;
-
+		friend Information;
+		Information m_info;
 		PCList m_freePC, m_busyPC, m_notConnectedPC;
 		std::vector<boost::shared_ptr<Task> > m_tasks;
 		boost::asio::io_service& m_io;
@@ -21,9 +22,5 @@ namespace EXider {
 		void startTask( const std::string& filePath, const std::string& arguments, int computersToUse, bool withoutSendingProgram );
 		void stopTask( size_t tID );
 		void discardTask( size_t tID );
-		// Getting information
-		void printTaskList();
-		void printTaskInformation(const std::vector<size_t>& tIDs );
-		void printPCList( size_t Status = Available);
 	};
 }

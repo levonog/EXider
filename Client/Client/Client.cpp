@@ -4,7 +4,7 @@ namespace EXider {
 
 	}
 	EXider::Client::Client( boost::asio::io_service & io ) :
-		m_io( io ) {
+		m_io( io ), m_info(this) {
 
 	}
 
@@ -49,7 +49,7 @@ namespace EXider {
 						std::cout << "Unexpected parameters" << std::endl;
 					}
 					else {
-						printPCList( Status == 0 ? Available : Status );
+						m_info.pcList( Status == 0 ? Available : Status );
 					}
 
 				}
@@ -139,8 +139,11 @@ namespace EXider {
 					else
 						saveRemotePCs( arg[ 0 ].parameters[ 0 ] );
 				}
+				else if ( arg[ 0 ].argument == "help" ) {
+					m_info.help( Information::CommandType::PC );
+				}
 				else {
-					std::cout << "Wrong argument." << std::endl;
+					m_info.wrongArgument( arg[ 0 ].argument );
 				}
 			}
 			else if ( parser.command() == "task" ) {
@@ -153,7 +156,7 @@ namespace EXider {
 						std::cout << "Invalid arguments." << std::endl;
 					}
 					if ( arg[ 0 ].parameters.empty() ) {
-						printTaskList();
+						m_info.taskList();
 					}
 					else {
 						bool notAllProcessed = false;
@@ -175,7 +178,7 @@ namespace EXider {
 						if ( notAllProcessed ) {
 							std::cout << "Warning! Not all Tasks will be processed." << std::endl;
 						}
-						printTaskInformation( tIDs );
+						m_info.taskInformation( tIDs );
 					}
 				}
 				else if ( arg[ 0 ].argument == "start" ) {
@@ -217,7 +220,7 @@ namespace EXider {
 				}
 			}
 			else if ( parser.command() == "help" ) {
-
+				m_info.help();
 			}
 			else if ( parser.command() == "exit" ) {
 				break;
@@ -292,70 +295,5 @@ namespace EXider {
 			throw std::exception( "Invalid Task ID" );
 		}
 		m_tasks.erase( m_tasks.begin() + tID );
-	}
-
-
-	void Client::printTaskList() {
-		for ( size_t i = 0; i < m_tasks.size(); ++i ) {
-			std::cout << "[" << i << "] Task result : " << m_tasks[ i ]->getResult() << std::endl;
-		}
-	}
-	void Client::printTaskInformation(const std::vector<size_t>& tIDs ) {
-		for ( auto tID : tIDs )
-			if ( tID > m_tasks.size() ) {
-				std::cout << "Invalid task ID: " << tID << std::endl;
-			}
-			else
-				std::cout << "Task " << tID << std::endl << m_tasks[ tID ]->getInfromation() << std::endl;
-	}
-	void Client::printPCList( size_t Status ) {
-		if ( Status & Available ) {
-			std::cout << "Available PCs: " << std::endl;
-			int countInLine = 3;
-			int counter = 0;
-			for ( auto pc : m_freePC ) {
-				if ( counter = 3 ) {
-					std::cout << std::endl;
-					counter = 0;
-				}
-				else if ( counter > 0 ) {
-					std::cout << "\t";
-				}
-				std::cout << pc->getIP().to_string();
-			}
-			std::cout << std::endl;
-		}
-		if ( Status & Busy ) {
-			std::cout << "Busy PCs: " << std::endl;
-			int countInLine = 3;
-			int counter = 0;
-			for ( auto pc : m_busyPC ) {
-				if ( counter = 3 ) {
-					std::cout << std::endl;
-					counter = 0;
-				}
-				else if ( counter > 0 ) {
-					std::cout << "\t";
-				}
-				std::cout << pc->getIP().to_string();
-			}
-			std::cout << std::endl;
-		}
-		if ( Status & NotConencted ) {
-			std::cout << "Not connected PCs: " << std::endl;
-			int countInLine = 3;
-			int counter = 0;
-			for ( auto pc : m_notConnectedPC ) {
-				if ( counter = 3 ) {
-					std::cout << std::endl;
-					counter = 0;
-				}
-				else if ( counter > 0 ) {
-					std::cout << "\t";
-				}
-				std::cout << pc->getIP().to_string();
-			}
-			std::cout << std::endl;
-		}
 	}
 }
