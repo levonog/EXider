@@ -1,10 +1,7 @@
 #include "Client.h"
 namespace EXider {
-	void Client::commandHandler( const std::string command ) {
-
-	}
 	EXider::Client::Client( boost::asio::io_service & io ) :
-		m_io( io ), m_info(this) {
+		m_io( io ), m_info( this ), m_nextTaskID( 0 ) {
 
 	}
 
@@ -24,31 +21,30 @@ namespace EXider {
 				else if ( arg[ 0 ].argument == "list" ) {
 					size_t Status = 0;
 					bool badStatus = false;
-					bool params = !arg[ 0 ].parameters.empty();
-					if ( !params )
-						for ( int i = 1; i < arg.size(); ++i ) {
-							if ( !arg[ i ].parameters.empty() ) {
-								params = true;
-								break;
-							}
-							if ( arg[ i ].argument == "available" )
-								Status |= Available;
-							else if ( arg[ i ].argument == "busy" )
-								Status |= Busy;
-							else if ( arg[ i ].argument == "not-connected" )
-								Status |= NotConencted;
-							else {
-								badStatus = true;
-								break;
-							}
+					if ( !arg[ 0 ].parameters.empty() ) {
+						m_info.wrongParameter( arg[ 0 ].parameters[ 0 ] );
+						continue;
+					}
+					bool params = false;
+					for ( int i = 1; i < arg.size(); ++i ) {
+						if ( !arg[ i ].parameters.empty() ) {
+							m_info.wrongParameter( arg[ i ].parameters[ 0 ] );
+							params = true;
+							break;
 						}
-					if ( badStatus ) {
-						std::cout << "Invalid Status" << std::endl;
+						if ( arg[ i ].argument == "available" )
+							Status |= Available;
+						else if ( arg[ i ].argument == "busy" )
+							Status |= Busy;
+						else if ( arg[ i ].argument == "not-connected" )
+							Status |= NotConencted;
+						else {
+							m_info.wrongArgument( arg[ i ].argument );
+							badStatus = true;
+							break;
+						}
 					}
-					else if ( params ) {
-						std::cout << "Unexpected parameters" << std::endl;
-					}
-					else {
+					if ( !badStatus && !params ) {
 						m_info.pcList( Status == 0 ? Available : Status );
 					}
 
@@ -87,7 +83,7 @@ namespace EXider {
 						}
 					}
 					if ( badIP ) {
-						std::cout << "Warning! Not all IPs will be processed. Some of them don't look like IPs\n";
+						m_info.warning( "Not all IPs will be processed. Some of them don't look like IP Addresses." );
 					}
 					addRemotePCs( pc_ip );
 				}
@@ -125,16 +121,16 @@ namespace EXider {
 						}
 					}
 					if ( badIP ) {
-						std::cout << "Warning! Not all IPs will be processed. Some of them don't look like IPs.\n";
+						m_info.warning( "Not all IPs will be processed. Some of them don't look like IP Addresses." );
 					}
 					deleteRemotePCs( pc_ip );
 				}
 				else if ( arg[ 0 ].argument == "save" ) {
 					if ( arg.size() != 1 ) {
-						std::cout << "Too many arguments in command \"save\".\n";
+						m_info.wrongArgument( arg[ 1 ].argument );
 					}
 					else if ( arg[ 0 ].parameters.size() != 1 ) {
-						std::cout << "No file name found!\n";
+						m_info.print( "No file name found!" );
 					}
 					else
 						saveRemotePCs( arg[ 0 ].parameters[ 0 ] );
@@ -183,9 +179,11 @@ namespace EXider {
 				}
 				else if ( arg[ 0 ].argument == "start" ) {
 					bool badArgument = false;
+					bool moreThanOneName = false;
 					int computersWillBeUsed = 1;
 					std::string programArguments = "";
 					std::string programPath = "";
+					std::string taskName = "";
 					bool withoutSending = false;
 					if ( !arg[ 0 ].parameters.empty() )
 						programPath = arg[ 0 ].parameters[ 0 ];
@@ -199,24 +197,32 @@ namespace EXider {
 						else if ( ( arg[ i ].argument == "a" || arg[ i ].argument == "arg" ) && arg[ i ].parameters.size() == 1 ) {
 							programArguments = arg[ i ].parameters[ 0 ];
 						}
-						else if ( arg[ i ].argument == "without-sending" || arg[ i ].argument == "ws" ) {
+						else if ( ( arg[ i ].argument == "ws" || arg[ i ].argument == "without-sending" ) && arg[ i ].parameters.empty() ) {
 							withoutSending = true;
 						}
+						else if ( ( arg[ i ].argument == "n" || arg[ i ].argument == "name" ) && arg[ i ].parameters.size() == 1 ) {
+							moreThanOneName |= !taskName.empty();
+							taskName = arg[ i ].parameters[ 0 ];
+						}
 						else {
-							std::cout << "Bad argument \"" << arg[ i ].argument << "\".\n";
+							m_info.wrongArgument( arg[ i ].argument );
 							badArgument = true;
 							break;
 						}
 					}
 					if ( badArgument )
 						continue;
-					startTask( programPath, programArguments, computersWillBeUsed, withoutSending );
+					startTask( ( taskName.empty() ? std::string( "Task " ) + boost::lexical_cast<std::string>( m_nextTaskID ) : taskName ), m_nextTaskID, programPath, programArguments, computersWillBeUsed, withoutSending );
+					++m_nextTaskID;
 				}
 				else if ( arg[ 0 ].argument == "stop" ) {
 
 				}
+				else if ( arg[ 0 ].argument == "help" ) {
+					m_info.help( Information::CommandType::Task );
+				}
 				else {
-					std::cout << "Wrong argument." << std::endl;
+					m_info.wrongArgument( arg[ 0 ].argument );
 				}
 			}
 			else if ( parser.command() == "help" ) {
@@ -226,7 +232,7 @@ namespace EXider {
 				break;
 			}
 			else {
-				std::cout << "Wrong command name: " << parser.command() << std::endl;
+				m_info.wrongArgument( parser.command() );
 			}
 		}
 
@@ -235,13 +241,19 @@ namespace EXider {
 	void Client::addRemotePCs( const std::vector<boost::asio::ip::address>& IPs ) {
 		for ( auto ip : IPs ) {
 			boost::shared_ptr<RemotePC> pc( new RemotePC( m_io, ip ) );
+			if ( m_notConnectedPC.find( pc ) != m_notConnectedPC.end() ||
+				 m_freePC.find( pc ) != m_freePC.end() ||
+				 m_busyPC.find( pc ) != m_busyPC.end() ) {	// Check, if the IP Address is already in one of the containers.
+				m_info.warning( std::string( "Remote PC with IP Address: " ) + ip.to_string() + " has been already added." );
+				continue;
+			}
 			if ( pc->connect() ) {
 				m_freePC.insert( pc );
-				std::cout << "Remote PC with IP " << ip.to_string() << " was connected.\n";
+				m_info.print( std::string( "Remote PC with IP " ) + ip.to_string() + " was connected." );
 			}
 			else {
 				m_notConnectedPC.insert( pc );
-				std::cout << "Remote PC with IP " << ip.to_string() << " wasn't connected.\n";
+				m_info.print( std::string( "Remote PC with IP " ) + ip.to_string() + " wasn't connected." );
 			}
 		}
 	}
@@ -267,9 +279,9 @@ namespace EXider {
 		}
 	}
 
-	void Client::startTask( const std::string & filePath, const std::string & arguments, int computersToUse, bool withoutSendingProgram ) {
+	void Client::startTask( const std::string& taskName, size_t taskID, const std::string & filePath, const std::string & arguments, int computersToUse, bool withoutSendingProgram ) {
 		if ( computersToUse > m_freePC.size() ) {
-			std::cout << "Not enough computers to process current task. " << m_freePC.size() << " available." << std::endl;
+			m_info.error( std::string( "Not enough computers to process current task. " ) + boost::lexical_cast<std::string>( m_freePC.size() ) + " available." );
 			return;
 		}
 		PCList listForTask;
@@ -279,21 +291,26 @@ namespace EXider {
 			m_freePC.erase( m_freePC.begin() );
 		}
 		if ( withoutSendingProgram ) {
-			m_tasks.push_back( boost::shared_ptr<Task>( new Task( m_io, listForTask, filePath + " " + arguments ) ) );
+			m_tasks.push_back( boost::shared_ptr<Task>( new Task( m_io, listForTask, filePath + " " + arguments, taskName, taskID ) ) );
 		}
-		std::cout << "Task started.\n";
+		m_info.print( "Task started." );
 		// TODO
 	}
 	void Client::stopTask( size_t tID ) {
-		if ( tID > m_tasks.size() ) {
-			throw std::exception( "Invalid Task ID" );
+		for ( auto task : m_tasks ) {
+			if ( task->getID() == tID ) {
+				task->stop();
+				m_info.print( "Task was stopped." );
+			}
 		}
-		m_tasks[ tID ]->stop();
 	}
 	void Client::discardTask( size_t tID ) {
-		if ( tID > m_tasks.size() ) {
-			throw std::exception( "Invalid Task ID" );
+		for ( int i = 0; i < m_tasks.size(); ++i) {
+			if ( m_tasks[i]->getID() == tID ) {
+				m_tasks.erase( m_tasks.begin() + i );
+				m_info.print( "Task was discarded." );
+				break;
+			}
 		}
-		m_tasks.erase( m_tasks.begin() + tID );
 	}
 }

@@ -1,17 +1,19 @@
 #include "EXider.h"
 namespace EXider {
-	Task::Task( boost::asio::io_service& io, const PCList& workingPCs, const std::string downloadURL, const std::string executeCommand, bool autoFree ) :
+	Task::Task( boost::asio::io_service& io, const PCList& workingPCs, const std::string downloadURL, const std::string executeCommand, const std::string& taskName, int tID, bool autoFree ) :
 		m_workingPCs( workingPCs ), m_downloadsFiles( true ), m_result( workingPCs.size(), "-" ),
-		m_downloadURL( downloadURL ), m_executeCommand( executeCommand ), m_autoFree( autoFree ), m_io( io ), m_thread( boost::bind( &Task::run, this ) ) {
+		m_downloadURL( downloadURL ), m_executeCommand( executeCommand ), m_autoFree( autoFree ), m_io( io ),
+		m_thread( boost::bind( &Task::run, this ) ), m_taskName( taskName ), m_tID( tID ) {
 		size_t pcID = 0;
 		for ( auto pc : m_workingPCs ) {
 			pc->setID( pcID++ );
 			pc->setCallBackFunction( boost::bind( &Task::handler, this, _1, _2 ) );
 		}
 	}
-	Task::Task( boost::asio::io_service& io, const PCList& workingPCs, const std::string executeCommand, bool autoFree ) :
+	Task::Task( boost::asio::io_service& io, const PCList& workingPCs, const std::string executeCommand, const std::string& taskName, int tID, bool autoFree ) :
 		m_workingPCs( workingPCs ), m_downloadsFiles( false ), m_result( workingPCs.size(), "-" ),
-		m_executeCommand( executeCommand ), m_autoFree( autoFree ), m_io( io ), m_thread( boost::bind( &Task::run, this ) ) {
+		m_executeCommand( executeCommand ), m_autoFree( autoFree ), m_io( io ),
+		m_thread( boost::bind( &Task::run, this ) ), m_taskName( taskName ), m_tID( tID ) {
 		size_t pcID = 0;
 		for ( auto pc : m_workingPCs ) {
 			pc->setID( pcID++ );
@@ -43,8 +45,8 @@ namespace EXider {
 		return sResult;
 	}
 	const std::string Task::getInfromation() const {
-		std::string sResult = getResult() + "\nPCs in Task:\n";
-		int countInLine = 3;
+		std::string sResult =  std::string("Task: ") + getName() + "\nID: " + boost::lexical_cast<std::string>( getID() ) + "\nResult: " + getResult() + "\nPCs in Task:";
+		int countInLine = 3;										// IPs in one line
 		int counter = 0;
 		for ( auto pc : m_workingPCs ) {
 			if ( counter = 3 ) {
@@ -56,7 +58,7 @@ namespace EXider {
 			}
 			sResult += pc->getIP().to_string();
 		}
-		return sResult += "\n";
+		return sResult;
 	}
 
 	void Task::handler( boost::shared_ptr<RemotePC> fromPC, const std::string result ) {
@@ -93,5 +95,11 @@ namespace EXider {
 			boost::recursive_mutex::scoped_lock lock( m_mutexForResult );
 			m_result[ fromPC->getID() ] = command;
 		}
+	}
+	const std::string& Task::getName() const {
+		return m_taskName;
+	}
+	const size_t Task::getID() const {
+		return m_tID;
 	}
 }

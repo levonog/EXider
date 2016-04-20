@@ -6,17 +6,28 @@ namespace EXider {
 	}
 
 	void Information::taskList() {
-		for ( size_t i = 0; i < m_client->m_tasks.size(); ++i ) {
-			std::cout << "[" << i << "] Task result : " << m_client->m_tasks[ i ]->getResult() << std::endl;
-		}
-	}
-	void Information::taskInformation( const std::vector<size_t>& tIDs ) {
-		for ( auto tID : tIDs )
-			if ( tID > m_client->m_tasks.size() ) {
-				std::cout << "Invalid task ID: " << tID << std::endl;
+		for ( auto task : m_client->m_tasks ) {
+			print( std::string( "[" ) + boost::lexical_cast<std::string>(task->getID()) + "] " + task->getName() + " result: " + task->getResult() );
 			}
-			else
-				std::cout << "Task " << tID << std::endl << m_client->m_tasks[ tID ]->getInfromation() << std::endl;
+	}
+	void Information::taskInformation( std::vector<size_t> tIDs ) {
+		if ( tIDs.empty() ) {
+			return;
+		}
+		std::sort( tIDs.begin(), tIDs.end() );
+		size_t tIDi = 0;
+		for ( auto task : m_client->m_tasks ) {
+			if ( task->getID() == tIDs[ tIDi ] ) {
+				print( task->getInfromation() );
+				if ( ++tIDi >= tIDs.size() )
+					break;
+			}
+			else if ( task->getID() > tIDs[ tIDi ] ) {
+				warning( std::string( "No task with ID " ) + boost::lexical_cast<std::string>( tIDs[ tIDi ] ) + " was found." );
+				if ( ++tIDi >= tIDs.size() )
+					break;
+			}
+		}
 	}
 
 	void Information::pcList( size_t Status ) {
@@ -72,12 +83,13 @@ namespace EXider {
 
 	void Information::help( size_t CommandTypes ) {
 		if ( CommandTypes & Usage ) {
-			std::cout <<
+			print(
 				"EXider Information\n"
-				"Usage (pc/task/help) (arguments) [parameters]\n" << std::endl;
+				"Usage (pc/task/help) (arguments) [parameters]\n" 
+				);
 		}
 		if ( CommandTypes & PC ) {
-			std::cout <<
+			print(
 				"pc -(add/delete/save/list) [arguments]\n"
 				"This command controls RemotePCs.\n"
 				"\n"
@@ -96,16 +108,26 @@ namespace EXider {
 				"   -busy                 - Prints busy RemotePC's IP Addresses\n"
 				"   -not-connected        - Prints not connected RemotePC's IP Addresses\n"
 				"\n"
-				"-help                    - Information about this command\n" << std::endl;
+				"-help                    - Information about this command\n"
+				);
 		}
 	}
-	void Information::warning( const std::string& message ) {
-		std::cout << "Warning! " << message << std::endl;
+	void Information::error( const std::string& message ) const {
+		print( std::string( "Error! " ) + message );
 	}
-	void Information::wrongArgument( const std::string& arg ) {
-		std::cout << "Wrong argument name \"" << arg << "\"." << std::endl;
+	void Information::warning( const std::string& message ) const {
+		print( std::string( "Warning! " ) + message );
 	}
-	void Information::wrongParameter( const std::string& param ) {
-		std::cout << "Wrong parameter \"" << param << "\"." << std::endl;
+	void Information::wrongArgument( const std::string& arg ) const {
+		print( std::string( "Wrong argument name \"" ) + arg + "\"." );
+	}
+	void Information::wrongParameter( const std::string& param ) const {
+		print( std::string( "Wrong parameter \"" ) + param + "\"." );
+	}
+	void Information::wrongCommand( const std::string& command ) const {
+		print( std::string( "Wrong command \"" ) + command + "\"." );
+	}
+	void Information::print( const std::string& message ) const {
+		std::cout << message << std::endl;
 	}
 }

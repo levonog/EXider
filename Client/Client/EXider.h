@@ -10,6 +10,7 @@
 #include <boost\asio.hpp>
 #include <boost\thread.hpp>
 #include <boost\regex.hpp>
+#include <boost\lexical_cast.hpp>
 namespace EXider {
 	const size_t EXIDER_PORT = 8008;
 	enum rpcStatus {	// RemotePC Statuses
@@ -28,7 +29,7 @@ namespace EXider {
 
 	class CommandParser;
 	class Logger; 
-	class Information;
+	class Information;	// Different information printer
 	class FtpClient;	// FTP Client to upload and download files
 	class RemotePC;		// Remote PC controller (Server controller) 
 	class Task;			// Task controller
