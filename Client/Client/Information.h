@@ -12,18 +12,18 @@ namespace EXider {
 		};
 		Information( const Client* client );
 		
-		void taskList();											// List of tasks with results
-		void taskInformation(  std::vector<size_t> tIDs );			// Full information about tasks
+		void taskList();                                            // List of tasks with results
+		void taskInformation(  std::vector<size_t> tIDs );          // Full information about tasks
 
-		void pcList( size_t Status = Available);					// List of RemotePCs
+		void pcList( size_t Status = Available);                    // List of RemotePCs
 
-		void help(size_t CommandTypes = (PC | Task | Usage) );		// Exider's commands instructions
+		void help(size_t CommandTypes = (PC | Task | Usage) );      // Exider's commands instructions
 
-		void error( const std::string& message ) const;				// Error message
-		void warning( const std::string& message ) const;			// Warning message
-		void wrongArgument( const std::string& arg ) const;			// Message of incorrect argument
-		void wrongParameter( const std::string& param ) const;		// Message of incorrect parameter
-		void wrongCommand( const std::string& command ) const;		// Message of incorrect command
-		void print( const std::string& message ) const;				// Print message
+		void error( const std::string& message ) const;	            // Error message
+		void warning( const std::string& message ) const;           // Warning message
+		void wrongArgument( const std::string& arg ) const;	        // Message of incorrect argument
+		void wrongParameter( const std::string& param ) const;      // Message of incorrect parameter
+		void wrongCommand( const std::string& command ) const;      // Message of incorrect command
+		void print( const std::string& message ) const;             // Print message
 	};
 }
