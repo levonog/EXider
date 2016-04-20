@@ -22,10 +22,10 @@ namespace EXider {
         bool connect();	                                        // Sync-Connect to the socket
         bool reconnect();                                       // Reconnecting to the socket
         void disconnect();                                      // Disconnecting the socke
-        inline const rpcStatus status() const;					// PC's current status
+        inline const rpcStatus status() const;                  // PC's current status
 
         void sendRequest( const std::string& request );	        // Async-Writing message in socket
-        void readRequest();	                                    // Async-Reading message from socket
+        void readRequest();                                     // Async-Reading message from socket
 
         // Setup PC's ID in current Task, and call-back function to communicate with the Task
         void setID( size_t ID );
