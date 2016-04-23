@@ -1,6 +1,6 @@
 #include "EXider.h"
 
-namespace EXider {
+using namespace EXider;
 	Server::Server( boost::asio::io_service& io ) :
 		m_io( io ), m_socket( new boost::asio::ip::tcp::socket( m_io ) ),
 		m_acceptor( m_io, boost::asio::ip::tcp::endpoint( boost::asio::ip::tcp::v4(), PORT ) ),
@@ -90,4 +90,3 @@ namespace EXider {
 		}
 		return 0;
 	}
-}

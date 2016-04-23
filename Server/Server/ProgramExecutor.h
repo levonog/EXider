@@ -8,6 +8,7 @@ namespace EXider {
 		boost::shared_ptr<boost::process::child> program;
 		std::queue<std::pair<int, Program> > m_executeQueue;
 		
+        CommandParser m_parser;
 		void sendResult( int id, const std::string& result );
 	public:
 		ProgramExecutor( boost::asio::io_service& m_io, Server* server );

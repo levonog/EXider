@@ -29,7 +29,7 @@ namespace EXider {
 
         // Setup PC's ID in current Task, and call-back function to communicate with the Task
         void setID( size_t ID );
-        void setCallBackFunction( const boost::function<void( boost::shared_ptr<RemotePC> fromPC, std::string result )>& cb );
+        void setCallBackFunction( const boost::function<void( boost::shared_ptr<RemotePC>, std::string )>& cb );
 
         boost::shared_ptr<RemotePC> getSelfPtr();               // Self Pointer
         const int getID() const;                                // PC's ID in current Task

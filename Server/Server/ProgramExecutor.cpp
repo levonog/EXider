@@ -1,6 +1,6 @@
 #include "EXider.h"
 
-namespace EXider {
+using namespace EXider;
 	ProgramExecutor::ProgramExecutor( boost::asio::io_service& m_io, Server* server ) :
 		m_io( m_io ), server( server ) {
 
@@ -14,9 +14,12 @@ namespace EXider {
 				// Copying data from Queue and unlocking mutex to be able to add new program to Queue
 				Program nowWorking = m_executeQueue.front().second;
 				int nowWorking_id = m_executeQueue.front().first;
+
+                // Setting up program path
 				std::string fullPath = nowWorking.getFullPath();
-				std::vector<std::string> arguments;
-				arguments.push_back( nowWorking.getArguments() );
+
+                // Setting up arguments
+                std::vector<std::string> arguments(nowWorking.getArguments());
 				m_executeQueue.pop();
 				sl.unlock();
 
@@ -56,5 +59,3 @@ namespace EXider {
 	void ProgramExecutor::sendResult( int id, const std::string& result ) {
 		server->executeHandler( id, result );
 	}
-
-}

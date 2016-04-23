@@ -15,6 +15,7 @@
 #include <boost\thread.hpp>
 #include <boost\timer.hpp>
 #include <boost\process.hpp>
+#include <boost\filesystem.hpp>
 namespace EXider {
 	// Variables, Enums and structs
 	const size_t PORT = 8008;
@@ -22,6 +23,7 @@ namespace EXider {
 		std::string argument;
 		std::vector<std::string> parameters;
 	};
+    typedef std::vector<EXiderArgument> argList;
 
 
 	// Classes
